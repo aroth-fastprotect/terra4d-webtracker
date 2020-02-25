@@ -1,0 +1,39 @@
+version: "3.2"
+services:
+    webtracker:
+        domainname: ${WT_DOMAIN:-example.com}
+        hostname: ${WT_HOST:-host}
+        image: fastprotect/terra4d-webtracker-nginx-aws-certbot:${WT_TAG:-bionic}
+        restart: always
+        ports:
+            - "80:80"
+            - "443:443"
+            - "18303:18303"
+        volumes:
+            - type: tmpfs
+              target: /tmp
+            - type: tmpfs
+              target: /run
+            - type: tmpfs
+              target: /run/lock
+            - type: bind
+              source: "/sys/fs/cgroup"
+              target: "/sys/fs/cgroup"
+              read_only: true
+            - type: volume
+              source: webtracker_db
+              target: /var/lib/fastprotect/terra4d/db
+            - type: volume
+              source: webtracker_certbot
+              target: /etc/letsencrypt
+            - type: volume
+              source: webtracker_certbot_state
+              target: /var/lib/letsencrypt
+        security_opt:
+            - "seccomp=unconfined"
+        cap_add:
+            - "SYS_ADMIN"
+volumes:
+    webtracker_db:
+    webtracker_certbot:
+    webtracker_certbot_state:
