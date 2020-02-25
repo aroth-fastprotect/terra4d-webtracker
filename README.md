@@ -14,10 +14,11 @@
     DOCKER_AWS_ACCESS_KEY='<secret>'
     DOCKER_AWS_SECRET_KEY='<secret>'
     DOCKER_AWS_REGION='eu-central-1'
+    DOCKER_AWS_INSTANCE_TYPE='t2.micro'
     ```
 * Create a docker machine on EC2:
     * `source aws_creds`
-    * `docker-machine create --driver amazonec2 --amazonec2-region "${DOCKER_AWS_REGION}" --amazonec2-access-key "${DOCKER_AWS_ACCESS_KEY}" --amazonec2-secret-key "${DOCKER_AWS_SECRET_KEY}" <machine_name>`
+    * `docker-machine create --driver amazonec2 --amazonec2-region "${DOCKER_AWS_REGION}" --amazonec2-access-key "${DOCKER_AWS_ACCESS_KEY}" --amazonec2-secret-key "${DOCKER_AWS_SECRET_KEY}" --amazonec2-instance-type "${DOCKER_AWS_INSTANCE_TYPE}" <machine_name>`
 * Use newly created docker machine:
     * `eval $(docker-machine env <machine_name>)`
 * Goto https://github.com/aroth-fastprotect/terra4d-webtracker
