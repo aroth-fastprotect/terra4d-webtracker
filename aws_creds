@@ -1,8 +1,8 @@
 # Amazon AWS account
 # AWS IAM user: webtracker
-DOCKER_AWS_USER='webtracker'
-DOCKER_AWS_ACCESS_KEY='secret'
-DOCKER_AWS_SECRET_KEY='secret'
+export DOCKER_AWS_USER='webtracker'
+export DOCKER_AWS_ACCESS_KEY='secret'
+export DOCKER_AWS_SECRET_KEY='secret'
 # Choose an AWS region for the machine
-DOCKER_AWS_REGION='eu-central-1'
-DOCKER_AWS_INSTANCE_TYPE='t2.micro'
+export DOCKER_AWS_REGION='eu-central-1'
+export DOCKER_AWS_INSTANCE_TYPE='t2.micro'
