@@ -8,15 +8,17 @@
     * Download/Save access key and secret in a safe place
 * Install/Download “Docker for Windows” or “Install Docker on Ubuntu” using the [official guide](https://docs.docker.com/install/linux/docker-ce/ubuntu/)
 * For the remaining instruction we are using an Ubuntu machine. The process is not identical on a Windows machine, but should be quite similar.
-* Create a text file named “aws_creds” with the AWS details/credentials (see AWS console):
+* Goto https://github.com/aroth-fastprotect/terra4d-webtracker
+    * Either use “git clone” or download the ZIP Packge from the GitHub page
+* Go to the “terra4d-webtracker” directory
+* Open the text file named “aws_creds” and change the AWS credentials and AWS region (see AWS console):
     ```
-    DOCKER_AWS_USER='webtracker'
-    DOCKER_AWS_ACCESS_KEY='<secret>'
-    DOCKER_AWS_SECRET_KEY='<secret>'
-    DOCKER_AWS_REGION='eu-central-1'
-    DOCKER_AWS_INSTANCE_TYPE='t2.micro'
+    export DOCKER_AWS_ACCESS_KEY='<secret>'
+    export DOCKER_AWS_SECRET_KEY='<secret>'
+    export DOCKER_AWS_REGION='eu-central-1'
     ```
 * Create a docker machine on EC2:
+    * Open a console session
     * `source aws_creds`
     * `docker-machine create --driver amazonec2 --amazonec2-region "${DOCKER_AWS_REGION}" --amazonec2-access-key "${DOCKER_AWS_ACCESS_KEY}" --amazonec2-secret-key "${DOCKER_AWS_SECRET_KEY}" --amazonec2-instance-type "${DOCKER_AWS_INSTANCE_TYPE}" <machine_name>`
 * Use newly created docker machine:
@@ -31,11 +33,8 @@
 myhost.mydomain.com. is an alias for ec2-15-135-214-16.eu-central-1.compute.amazonaws.com
 ec2-15-135-214-16.eu-central-1.compute.amazonaws.com has address 15.135.214.16
         ```
-* Goto https://github.com/aroth-fastprotect/terra4d-webtracker
-    * Either use “git clone” or download the ZIP Packge from the GitHub page
-* Go to the “terra4d-webtracker” directory
 * start webtracker docker on AWS docker machine:
-    * `WT_HOST=myhost WT_DOMAIN=mydomain.com docker-compose up -d`
+    * `docker-compose up -d`
     * This outputs the name of the newly created container; e.g. `terra4d-webtracker_webtracker_1`
 * Run `docker exec -it terra4d-webtracker_webtracker_1 /bin/bash` to get a SSH console session on the new machine
 * Run `/root/first-start.sh`
@@ -52,8 +51,9 @@ ec2-15-135-214-16.eu-central-1.compute.amazonaws.com has address 15.135.214.16
 Restart the webtracker container:
 * Run `eval $(docker-machine env <machine_name>)` in console
 * Go to the “terra4d-webtracker” directory (with the docker-compose.yml file)
-* `WT_HOST=myhost WT_DOMAIN=mydomain.com docker-compose down`
-* `WT_HOST=myhost WT_DOMAIN=mydomain.com docker-compose up -d`
+* `source aws_creds`
+* `docker-compose down`
+* `docker-compose up -d`
 
 Restart/Shutdown the docker machine:
 * Run `eval $(docker-machine env <machine_name>)` in console
