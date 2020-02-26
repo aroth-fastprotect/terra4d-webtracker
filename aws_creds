@@ -6,3 +6,8 @@ export DOCKER_AWS_SECRET_KEY='secret'
 # Choose an AWS region for the machine
 export DOCKER_AWS_REGION='eu-central-1'
 export DOCKER_AWS_INSTANCE_TYPE='t2.micro'
+
+# Hostname and domain of the webtracker machine
+export WT_HOST='mywebtracker'
+export WT_DOMAIN='mydomain.com'
+#export WT_TAG='beta'
