@@ -41,7 +41,10 @@
     * This either gives a message like "myhost.mydomain.com has been correctly registered with Let's Encrypt." or results in an error message
     "Failed to register myhost.mydomain.com with Let's Encrypt."
     * In case of an failure most likely the DNS is not set up correctly. Please check that the DNS CNAME record is correct and can be successfully resolved. Sometimes DNS update might take some time to take effect.
+    * To check the log file for the Let's Encrypt certification request
+        * run `cat /var/log/letsencrypt/letsencrypt.log`
     * After you corrected the issue, please repeat to run the above command.
+
 * Check if everything is working fine:
     * `docker exec -it terra4d-webtracker_webtracker_1 /bin/bash`
     * `systemctl status`
