@@ -1,5 +1,6 @@
 # Terra4D Webtracker setup on AWS
 
+## Installation
 * Get/create AWS account
 * Get AWS access key from AWS console using AWS IAM service.
     * Create new group: docker-machine, with “AmazonEC2FullAccess” permissions
@@ -7,9 +8,9 @@
     * Goto user “webtracker”, tab “Security credentials”, Create Access key
     * Download/Save access key and secret in a safe place
 * Install/Download “Docker for Windows” or “Install Docker on Ubuntu” using the [official guide](https://docs.docker.com/install/linux/docker-ce/ubuntu/)
-* For the remaining instruction we are using an Ubuntu machine. The process is not identical on a Windows machine, but should be quite similar.
+* For the remaining instruction we are using an Ubuntu machine. The process is **not** identical on a Windows machine, but should be quite similar.
 * Goto https://github.com/aroth-fastprotect/terra4d-webtracker
-    * Either use “git clone” or download the ZIP Packge from the GitHub page
+    * Either use “git clone” or download and unzip the ZIP Package from the GitHub page
 * Go to the “terra4d-webtracker” directory
 * Open the text file named “aws_creds” and change the AWS credentials and AWS region (see AWS console):
     ```
@@ -24,11 +25,11 @@
 * Use newly created docker machine:
     * `eval $(docker-machine env <machine_name>)`
 * Go to the AWS console and check the newly created instance in "EC2", "Instances"
-    * Select the new instance "<machine_name>" and copy the "Public DNS" entry; e.g. ec2-15-135-214-16.eu-central-1.compute.amazonaws.com
+    * Select the new instance `<machine_name>` and copy the `Public DNS` entry; e.g. ec2-15-135-214-16.eu-central-1.compute.amazonaws.com
 * Go to the DNS management tool for your domain
-    * Create a DNS-Record of type CNAME for "myhost.mydomain.com." and set the target to the "Public DNS" entry copied from the AWS console.
+    * Create a DNS-Record of type CNAME for "myhost.mydomain.com." and set the target to the `Public DNS` entry copied from the AWS console.
     * Check if the DNS record works and can be correctly resolved.
-    * Running `host myhost.mydomain.com.` should return for example:
+    * Running `host myhost.mydomain.com.` on Linux should return for example:
         ```
         myhost.mydomain.com. is an alias for ec2-15-135-214-16.eu-central-1.compute.amazonaws.com
         ec2-15-135-214-16.eu-central-1.compute.amazonaws.com has address 15.135.214.16
@@ -54,16 +55,32 @@
     hostname and domain cannot be verified by Let's Encrypt. Restarting this service using `systemctl restart webtracker-first-start.service` after you fixed the DNS
     configuration/records attempts to request the SSL certificate from Let's Encrypt again.
 
-Restart the webtracker container:
+## Update webtracker container
 * Run `eval $(docker-machine env <machine_name>)` in console
 * Go to the “terra4d-webtracker” directory (with the docker-compose.yml file)
-* `source aws_creds`
-* `docker-compose down`
-* `docker-compose up -d`
+* Run `source aws_creds`
+* Run `docker-compose pull`
+* Run `docker-compose restart`
 
-Restart/Shutdown the docker machine:
+## Restart the webtracker container
 * Run `eval $(docker-machine env <machine_name>)` in console
+* Go to the “terra4d-webtracker” directory (with the docker-compose.yml file)
+* Run `source aws_creds`
+* `docker-compose restart`
+
+## Stop the webtracker container
+* Run `eval $(docker-machine env <machine_name>)` in console
+* Go to the “terra4d-webtracker” directory (with the docker-compose.yml file)
+* Run `source aws_creds`
+* Run `docker-compose down`
+
+## Restart/Shutdown the docker machine
+* Run `eval $(docker-machine env <machine_name>)` in console
+* Go to the “terra4d-webtracker” directory (with the docker-compose.yml file)
+* Run `source aws_creds`
 * To restart the machine, run `docker-machine restart`
 * To shutdown the machine, run `docker-machine stop`
 * To start a previously stopped machine, run `docker-machine start`
+* Restarting or stopping the complete machine results in loss of the IP address. After restarting the machine the machine gets a new IP
+  address and therefore the DNS CNAME record must be updated.
 
