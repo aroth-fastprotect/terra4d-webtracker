@@ -6,10 +6,10 @@
     * Create new group: docker-machine, with “AmazonEC2FullAccess” permissions
     * Create new user: webtracker, assign to group “docker-machine”
     * Goto user “webtracker”, tab “Security credentials”, Create Access key
-    * Download/Save access key and secret in a safe place
+    * Download access key and secret and store in a safe place
 * Install/Download “Docker for Windows” or “Install Docker on Ubuntu” using the [official guide](https://docs.docker.com/install/linux/docker-ce/ubuntu/)
-* For the remaining instruction we are using an Ubuntu machine. The process is **not** identical on a Windows machine, but should be quite similar.
-* Goto https://github.com/aroth-fastprotect/terra4d-webtracker
+* For the remaining instructions we are using an Ubuntu machine. The process is **not** identical on a Windows machine, but should be quite similar.
+* Go to https://github.com/aroth-fastprotect/terra4d-webtracker
     * Either use “git clone” or download and unzip the ZIP Package from the GitHub page
 * Go to the “terra4d-webtracker” directory
 * Open the text file named “aws_creds” and change the AWS credentials and AWS region (see AWS console):
@@ -28,32 +28,43 @@
     * Select the new instance `<machine_name>` and copy the `Public DNS` entry; e.g. ec2-15-135-214-16.eu-central-1.compute.amazonaws.com
 * Go to the DNS management tool for your domain
     * Create a DNS-Record of type CNAME for "myhost.mydomain.com." and set the target to the `Public DNS` entry copied from the AWS console.
-    * Check if the DNS record works and can be correctly resolved.
+    * Check if the DNS record is working and can be correctly resolved.
     * Running `host myhost.mydomain.com.` on Linux should return for example:
         ```
         myhost.mydomain.com. is an alias for ec2-15-135-214-16.eu-central-1.compute.amazonaws.com
         ec2-15-135-214-16.eu-central-1.compute.amazonaws.com has address 15.135.214.16
         ```
-* start webtracker docker on AWS docker machine:
+* Start webtracker docker on AWS docker machine:
     * `docker-compose up -d`
     * This outputs the name of the newly created container; e.g. `terra4d-webtracker_webtracker_1`
-* Run `docker exec -it terra4d-webtracker_webtracker_1 /bin/bash` to get a SSH console session on the new machine
-* Run `/root/first-start.sh`
-    * This either gives a message like "myhost.mydomain.com has been correctly registered with Let's Encrypt." or results in an error message
-    "Failed to register myhost.mydomain.com with Let's Encrypt."
-    * In case of an failure most likely the DNS is not set up correctly. Please check that the DNS CNAME record is correct and can be successfully resolved. Sometimes DNS update might take some time to take effect.
-    * To check the log file for the Let's Encrypt certification request
-        * run `cat /var/log/letsencrypt/letsencrypt.log`
-    * After you corrected the issue, please repeat to run the above command.
 
-* Check if everything is working fine:
-    * `docker exec -it terra4d-webtracker_webtracker_1 /bin/bash`
-    * `systemctl status`
-        * This should report system is running normally, if some service is not running use:
-        * `/usr/bin/restart-webtracker`
-    * `systemctl` shows the list of all services and their status. The `webtracker-first-start.service` service fails if the certificate for the configured
-    hostname and domain cannot be verified by Let's Encrypt. Restarting this service using `systemctl restart webtracker-first-start.service` after you fixed the DNS
-    configuration/records attempts to request the SSL certificate from Let's Encrypt again.
+## Check webtracker service container
+* Run `eval $(docker-machine env <machine_name>)` in console
+* Go to the “terra4d-webtracker” directory (with the docker-compose.yml file)
+* Run `source aws_creds`
+* Run `docker exec -it terra4d-webtracker_webtracker_1 /bin/bash` to get a SSH console session on the new machine
+
+### Overall status
+* Run `systemctl status` to get the overall system status.
+* `systemctl` shows the list of all services and their status. If the `webtracker-first-start.service` service fails the SSL certificate for the configured
+    hostname and domain cannot be verified by Let's Encrypt and the machine uses a self-signed certificate.
+
+### Let's Encrypt issues
+* Check the Let's Encrypt log file; run `cat /var/log/letsencrypt/letsencrypt.log`
+    * The log file contains the data exchanged between the Let's Encrypt server and the docker container. Examine the log file and check
+      the manual for Let's Encrypt or Certbot for guidance.
+    * If certbot fails to register the docker on Let's Encrypt service the DNS name is not working and you get an error when accessing the machine via HTTPs.
+    * After you corrected the issue, please repeat to run `systemctl restart webtracker-first-start.service`. This will repeat the registeration process. If the registeration was previously successful,
+    the script refuses register again.
+
+### Restart webtracker services
+* Run `systemctl status` to get the overall system status.
+* This should report system is running normally, if some service is not running use:
+* `/usr/bin/restart-webtracker`
+
+### Get version
+* Visit the web page `https://<myhost.mydomain.com>/` returns a web page with the version of the webtracker service.
+* Use `https://<myhost.mydomain.com>/version` to retrieve technical version information (as JSON).
 
 ## Update webtracker container
 * Run `eval $(docker-machine env <machine_name>)` in console
@@ -81,6 +92,6 @@
 * To restart the machine, run `docker-machine restart`
 * To shutdown the machine, run `docker-machine stop`
 * To start a previously stopped machine, run `docker-machine start`
-* Restarting or stopping the complete machine results in loss of the IP address. After restarting the machine the machine gets a new IP
+* Restarting or stopping the complete machine results in loss of the IP address. After restarting the machine it gets a new IP
   address and therefore the DNS CNAME record must be updated.
 
