@@ -28,10 +28,10 @@
 * Go to the DNS management tool for your domain
     * Create a DNS-Record of type CNAME for "myhost.mydomain.com." and set the target to the "Public DNS" entry copied from the AWS console.
     * Check if the DNS record works and can be correctly resolved.
-    * Run `host myhost.mydomain.com.`, which should return for example
+    * Running `host myhost.mydomain.com.` should return for example:
         ```
-myhost.mydomain.com. is an alias for ec2-15-135-214-16.eu-central-1.compute.amazonaws.com
-ec2-15-135-214-16.eu-central-1.compute.amazonaws.com has address 15.135.214.16
+        myhost.mydomain.com. is an alias for ec2-15-135-214-16.eu-central-1.compute.amazonaws.com
+        ec2-15-135-214-16.eu-central-1.compute.amazonaws.com has address 15.135.214.16
         ```
 * start webtracker docker on AWS docker machine:
     * `docker-compose up -d`
@@ -45,8 +45,11 @@ ec2-15-135-214-16.eu-central-1.compute.amazonaws.com has address 15.135.214.16
 * Check if everything is working fine:
     * `docker exec -it terra4d-webtracker_webtracker_1 /bin/bash`
     * `systemctl status`
-        ▪ This should report system is running normally, if some service is not running use:
-        ▪ `/usr/bin/restart-webtracker`
+        * This should report system is running normally, if some service is not running use:
+        * `/usr/bin/restart-webtracker`
+    * `systemctl` shows the list of all services and their status. The `webtracker-first-start.service` service fails if the certificate for the configured
+    hostname and domain cannot be verified by Let's Encrypt. Restarting this service using `systemctl restart webtracker-first-start.service` after you fixed the DNS
+    configuration/records attempts to request the SSL certificate from Let's Encrypt again.
 
 Restart the webtracker container:
 * Run `eval $(docker-machine env <machine_name>)` in console
