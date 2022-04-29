@@ -34,33 +34,35 @@
         myhost.mydomain.com. is an alias for ec2-15-135-214-16.eu-central-1.compute.amazonaws.com
         ec2-15-135-214-16.eu-central-1.compute.amazonaws.com has address 15.135.214.16
         ```
+* Modify docker-compose.yml to match the hostname and domainname of your machine.
+* For the first run enable the volume "./nginx-first-start" and disable the "./nginx" volume for the
+  nginx service
 * Start webtracker docker on AWS docker machine:
     * `docker-compose up -d`
-    * This outputs the name of the newly created container; e.g. `terra4d-webtracker_webtracker_1`
+    * This outputs the name of the newly created containers; e.g. `terra4d-webtracker_webtracker_1`
+* Note: docker-machine or docker-compose do not copy the nginx config from the local directory to the remote machine.
+  You need to copy these files manually via SSH/SCP to the remote machine. E.g. `docker-machine ssh <machine_name>`
+* Run `sh ./first-start`
+  This registers the host with lets-encrypt. If this is successful continie with next step, otherwise
+  re-run `sh ./first-start` until is succeeds.
+* Disable the volume "./nginx-first-start" and enable the "./nginx" volume for the
+  nginx service
+* Re-Run `docker-compose up -d` to activate the changes
+
 
 ## Check webtracker service container
 * Run `eval $(docker-machine env <machine_name>)` in console
 * Go to the “terra4d-webtracker” directory (with the docker-compose.yml file)
 * Run `source aws_creds`
-* Run `docker exec -it terra4d-webtracker_webtracker_1 /bin/bash` to get a SSH console session on the new machine
+* Run `docker ps` to the status of all running docker service
 
-### Overall status
-* Run `systemctl status` to get the overall system status.
-* `systemctl` shows the list of all services and their status. If the `webtracker-first-start.service` service fails the SSL certificate for the configured
-    hostname and domain cannot be verified by Let's Encrypt and the machine uses a self-signed certificate.
+### Restart webtracker service
+* Run `eval $(docker-machine env <machine_name>)` in console
+* Run `docker restart terra4d-webtracker_webtracker_1`
 
-### Let's Encrypt issues
-* Check the Let's Encrypt log file; run `cat /var/log/letsencrypt/letsencrypt.log`
-    * The log file contains the data exchanged between the Let's Encrypt server and the docker container. Examine the log file and check
-      the manual for Let's Encrypt or Certbot for guidance.
-    * If certbot fails to register the docker on Let's Encrypt service the DNS name is not working and you get an error when accessing the machine via HTTPs.
-    * After you corrected the issue, please repeat to run `systemctl restart webtracker-first-start.service`. This will repeat the registeration process. If the registeration was previously successful,
-    the script refuses register again.
-
-### Restart webtracker services
-* Run `systemctl status` to get the overall system status.
-* This should report system is running normally, if some service is not running use:
-* `/usr/bin/restart-webtracker`
+### Restart nginx service
+* Run `eval $(docker-machine env <machine_name>)` in console
+* Run `docker restart terra4d-webtracker_nginx_1`
 
 ### Get version
 * Visit the web page `https://<myhost.mydomain.com>/` returns a web page with the version of the webtracker service.
@@ -73,13 +75,7 @@
 * Run `docker-compose pull`
 * Run `docker-compose restart`
 
-## Restart the webtracker container
-* Run `eval $(docker-machine env <machine_name>)` in console
-* Go to the “terra4d-webtracker” directory (with the docker-compose.yml file)
-* Run `source aws_creds`
-* `docker-compose restart`
-
-## Stop the webtracker container
+## Stop all webtracker services
 * Run `eval $(docker-machine env <machine_name>)` in console
 * Go to the “terra4d-webtracker” directory (with the docker-compose.yml file)
 * Run `source aws_creds`
