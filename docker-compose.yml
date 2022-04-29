@@ -1,39 +1,57 @@
+# docker-machine or docker-compose do not copy the nginx config from the
+# local directory to the remote machine. You need to copy these files manually
+# via SSH/SCP to the remote machine.
+
 version: "3.2"
 services:
-    webtracker:
+    nginx:
         domainname: ${WT_DOMAIN:-example.com}
         hostname: ${WT_HOST:-host}
-        image: fastprotect/terra4d-webtracker-nginx-aws-certbot:${WT_TAG:-bionic}
-        restart: always
+        depends_on:
+            - terra4d_webtracker
+        image: fastprotect/nginx:latest
+        restart: "unless-stopped"
         ports:
             - "80:80"
             - "443:443"
-            - "18303:18303"
         volumes:
-            - type: tmpfs
-              target: /tmp
-            - type: tmpfs
-              target: /run
-            - type: tmpfs
-              target: /run/lock
-            - type: bind
-              source: "/sys/fs/cgroup"
-              target: "/sys/fs/cgroup"
-              read_only: true
+            - ./nginx:/etc/nginx/conf.template.d
+            #- ./nginx-first-start:/etc/nginx/conf.template.d
+            - webtracker_certbot:/etc/letsencrypt
+            - certbot_www:/var/www
+            - webtracker_www:/var/lib/fastprotect/terra4d/www
+        environment:
+            - NGINX_USE_ENVSUBST=1
+    terra4d_webtracker:
+        domainname: ${WT_DOMAIN:-example.com}
+        hostname: ${WT_HOST:-host}
+        image: fastprotect/terra4d-webtracker:${WT_TAG:-bionic}
+        restart: "unless-stopped"
+        ports:
+            - "18303:18303"
+            - "1777:1777"
+        volumes:
             - type: volume
               source: webtracker_db
               target: /var/lib/fastprotect/terra4d/db
-            - type: volume
-              source: webtracker_certbot
-              target: /etc/letsencrypt
-            - type: volume
-              source: webtracker_certbot_state
-              target: /var/lib/letsencrypt
-        security_opt:
-            - "seccomp=unconfined"
-        cap_add:
-            - "SYS_ADMIN"
+            - webtracker_www:/var/lib/fastprotect/terra4d/www
+            - webtracker_certbot:/etc/letsencrypt
+    certbot:
+        domainname: ${WT_DOMAIN:-example.com}
+        hostname: ${WT_HOST:-host}
+        image: certbot/certbot
+        # See instructions on
+        # https://medium.com/@pentacent/nginx-and-lets-encrypt-with-docker-in-less-than-5-minutes-b4b8a60d3a71
+        restart: "unless-stopped"
+        volumes:
+            - webtracker_certbot:/etc/letsencrypt
+            - webtracker_certbot_state:/var/lib/letsencrypt
+            - certbot_www:/var/www
+        #command: certonly --webroot -w /var/www/ --agree-tos --non-interactive -m webmaster@fastsystems.ch -d fast-srv02.fn.terra4d.de
+        entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
 volumes:
     webtracker_db:
+    webtracker_www:
     webtracker_certbot:
     webtracker_certbot_state:
+    certbot_www:
